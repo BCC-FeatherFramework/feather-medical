@@ -1,7 +1,7 @@
 local count = 0
 for _, path in ipairs({'../feather-character/server/activation.lua','../feather-admin/server/services/boosters.lua','../feather-admin/client/services/boosters.lua'}) do
  local f=assert(io.open(path)); local source=f:read('*a'); f:close()
- local helper=assert(source:match('^(.-)\n\n'))
+ local helper=assert(source:gsub('\r\n', '\n'):match('^(.-)\n\n'))
  local policy=assert((loadstring or load)(helper..'\nreturn medicalEnabled'))()
  local state, health, throws='missing', {}, false
  GetResourceState=function() return state end

@@ -27,6 +27,20 @@ exports('ReadNativeWeaponCondition',function(source,context)
     return {ok=true,value=G.Snapshot(record,bound)}
 end)
 
+-- Law reads only its bound, fully spawned character's condition before physical execution.
+exports('ReadLawExecutionCondition',function(source,context)
+    if GetInvokingResource()~='bcc-law' or type(source)~='number' or source<1 or source%1~=0
+        or type(context)~='table' or type(context.characterId)~='string' or #context.characterId~=36
+        or type(context.sessionId)~='string' or #context.sessionId<1 or #context.sessionId>128 then return err('forbidden') end
+    local bound={characterId=context.characterId,sessionId=context.sessionId}
+    if not current(source,bound) then return err('stale_session') end
+    local called,record=pcall(MedicalRepository.Get,bound.characterId)
+    if not called then return err('storage_unavailable') end
+    if not record then return err('condition_missing') end
+    if not current(source,bound) then return err('stale_session') end
+    return {ok=true,value=G.Snapshot(record,bound)}
+end)
+
 function G.Snapshot(record, context)
     return {lifeState = record.lifeState, revision = record.revision, episodeId = record.episodeId,
         bleedOutAt = record.bleedOutAt, doctorAvailableAt = record.doctorAvailableAt,
